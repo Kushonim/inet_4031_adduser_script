@@ -5,14 +5,14 @@
 # Date Created: 3/23/2026
 # Date Last Modified: 3/23/2026
 
-import os # Used to execute system-level Linux commands
-import re # Used for pattern matching (regular expressions)
-import sys # Used to read input from standard input (stdin)
+import os      # Used to execute system-level Linux commands
+import re      # Used for pattern matching (regular expressions)
+import sys     # Used to read input from standard input (stdin)
 
 def main():
     for line in sys.stdin:
 
-        # Skip lines that start with '#' (used for comments in the input file)
+        # Skip lines that start with "#" (used for comments in the input file)
         match = re.match("^#", line)
 
         # Remove whitespace/newlines and split the line into fields using ":" as a delimiter
@@ -22,7 +22,7 @@ def main():
         # - If the line is a comment
         # - If it does not contain exactly 5 required fields
         # This ensures only properly formatted user entries are processed
-        if match or len(fields) !=5;
+        if match or len(fields) != 5:
             continue
 
         # Extract user account information from the input fields
@@ -50,7 +50,7 @@ def main():
         print("==> Setting the password for %s..." % (username))
 
         # Build command to set the user's password automatically using echo + passwd
-        cmd = "/bin/echo -ne '%s\n%s' | /user/bin/sudo /user/bin/passwd %s" % (password, password, username)
+        cmd = "/bin/echo -ne '%s\n%s' | /usr/bin/sudo /usr/bin/passwd %s" % (password, password, username)
 
         # Uncomment to actually execute password assignment
         # print(cmd)
@@ -58,7 +58,7 @@ def main():
 
         # Loop through each group and assign user to valid groups
         for group in groups:
-            # skip "-" which indicates no group assignment
+            # Skip "-" which indicates no group assignment
             # If valid group, user is added to that group
             if group != '-':
                 print("==> Assigning %s to the %s group..." % (username, group))
