@@ -10,63 +10,36 @@ import re      # Used for pattern matching (regular expressions)
 import sys     # Used to read input from standard input (stdin)
 
 def main():
+    # Loop through each line from the input file
     for line in sys.stdin:
-
-        # Skip lines that start with "#" (used for comments in the input file)
+        # Skip commented lines or lines that don't have exactly 5 fields
         match = re.match("^#", line)
-
-        # Remove whitespace/newlines and split the line into fields using ":" as a delimiter
         fields = line.strip().split(':')
-
-        # Ignore invalid lines:
-        # - If the line is a comment
-        # - If it does not contain exactly 5 required fields
-        # This ensures only properly formatted user entries are processed
         if match or len(fields) != 5:
             continue
 
-        # Extract user account information from the input fields
+        # Extract user info from fields
         username = fields[0]
         password = fields[1]
-
-        # Format user information for the GECOS field (Full Name and additional info)
-        # This is stored in /etc/passwd and typically contains user details
         gecos = "%s %s,,," % (fields[3], fields[2])
 
-        # Split group names into a list (comma-separated in input file)
+        # Split groups list for later assignment
         groups = fields[4].split(',')
 
-        # Inform the user that account creation is starting
-        print("==> Creating account for %s..." % (username))
+        # Print commands instead of executing for dry run
+        print(f"==> Creating account for {username}...")
+        cmd = f"/usr/sbin/adduser --disabled-password --gecos '{gecos}' {username}"
+        print(cmd)
 
-        # Build the Linux command to create a user with no password initially
-        cmd = "/usr/sbin/adduser --disabled-password --gecos '%s' %s" % (gecos, username)
+        print(f"==> Setting the password for {username}...")
+        cmd = f"/bin/echo -ne '{password}\\n{password}' | /usr/bin/sudo /usr/bin/passwd {username}"
+        print(cmd)
 
-        # Uncomment to actually execute user creation (dry run leaves this commented)
-        # print(cmd)
-        # os.system(cmd)
-
-        # Inform the user that password setup is starting
-        print("==> Setting the password for %s..." % (username))
-
-        # Build command to set the user's password automatically using echo + passwd
-        cmd = "/bin/echo -ne '%s\n%s' | /usr/bin/sudo /usr/bin/passwd %s" % (password, password, username)
-
-        # Uncomment to actually execute password assignment
-        # print(cmd)
-        # os.system(cmd)
-
-        # Loop through each group and assign user to valid groups
-        for group in groups:
-            # Skip "-" which indicates no group assignment
-            # If valid group, user is added to that group
-            if group != '-':
-                print("==> Assigning %s to the %s group..." % (username, group))
-                cmd = "/usr/sbin/adduser %s %s" % (username, group)
-
-                # Uncomment to execute group assignment
-                # print(cmd)
-                # os.system(cmd)
+    for group in groups:
+        if group != '-':  # Only assign if a group is listed
+            print(f"==> Assigning {username} to the {group} group...")
+            cmd = f"/usr/sbin/adduser {username} {group}"
+            print(cmd)
 
 if __name__ == '__main__':
     main()
